@@ -1,70 +1,93 @@
-# 转写引导的滑动窗口片段选择 / Transcript-Guided Sliding-Window Selection
+# 转写引导的滑动窗口片段选择：实验代码与结果
 
-本项目包含同一篇课程论文的完整中文和英文版本，使用同一组算法、实验、图表及参考文献。两版均已编译为四页 IEEE Computer Society Transactions 双栏格式。
+本仓库只保留实验部分：数据获取、句子打分、窗口选择、结果核对与计时。
+论文源文件（中英文 `.tex`、PDF、`.bib`、IEEEtran 样式）不在仓库内。
 
-## Overleaf 使用
+## 实验流程
 
-1. 将 `speech_window_paper_overleaf.zip` 上传为新项目。
-2. 中文版主文件选择 `main_zh.tex`；英文版主文件选择 `main_en.tex`。
-3. 编译器选择 **XeLaTeX**，点击 Recompile。引用由 Overleaf 自动调用 BibTeX 生成。
-4. 替换作者姓名；按课程要求补充学号、单位和班级。
+1. `fetch_data.py` 下载公开 SPIRAL 标注并校验 SHA-256。
+2. `experiment.py` 在每条记录的参考转写上计算 TF-IDF 句子相关分数。
+3. 在固定句数预算下比较四种片段选择方法：
+   - 开头裁剪（first）
+   - 随机连续窗口（random，枚举全部合法起点取精确期望）
+   - 分数 Top-k（topk）
+   - 滑动窗口（sliding，最早出现的最大和连续窗口）
+4. 输出逐条结果、汇总、标注核对、正确性检查与计时。
 
-两份 PDF 是已编译的阅读版本。IEEEtran 类、参考文献样式和图表均已包含，编译论文无需运行实验、下载数据或安装 Python。版式沿用上一版所选的 IEEE/TPAMI 相关双栏基础；当前内容是课程论文，不代表正式投稿或期刊录用评估。
+关键句标注、选项和答案只在评价阶段读取，不参与 TF-IDF 构建或窗口选择。
 
-## 内容与实验范围
+## 数据
 
-研究流程为：参考转写 → TF-IDF 句子相关分数 → 固定句数滑动窗口 → 关键跨度命中率。
+- 来源：[SPIRAL 作者仓库](https://github.com/linyueqian/SPIRAL_Dataset)
+- 文件：`data/spiral_data.jsonl`，3,965,780 字节
+- SHA-256：`485225b9ef52c98298ceb06745c7acf022dcc7c6436c610a17dbd11e8022519f`
+- 规模：1,012 条记录（350 讲座、324 会议、338 日常对话）
+- 仓库内已包含该快照；`fetch_data.py` 用于重新下载并核对同一版本，上游变化时会报错停止。
+- 数据中的 `.jsonl` 以 `-text` 保存，检出后字节不变，SHA-256 可直接复核。
 
-- 使用全部 1,012 条公开 SPIRAL 标注：350 条讲座、324 条会议、338 条日常对话。
-- 比较开头裁剪、随机连续窗口、分数 Top-k 与滑动窗口。
-- 预算为句子数，名义比例为 10%、20%、30%、50%，实际使用向上取整。
-- 名义 20% 预算下，滑动窗口完整关键跨度命中率 86.86%，随机窗口 25.30%，Top-k 87.06%。
-- 本实验使用发布者提供的转写，不运行 ASR、音频大模型或语音问答。关键跨度命中率不是问答准确率，句数预算不是秒数预算。
-- 全部数字由脚本执行产生。原文 SpeechPrune 的模型性能没有写作本项目实验结果。
+## 复现
 
-## 文件
+```text
+python -m pip install -r requirements.txt
+python experiment.py
+```
 
-| 文件 | 用途 |
-|---|---|
-| `main_zh.tex` / `main_en.tex` | 独立中英文论文主文件 |
-| `main_zh.pdf` / `main_en.pdf` | 四页阅读版本 |
-| `references.bib` | 五项已核验文献 |
-| `IEEEtran.cls` / `IEEEtran.bst` | 未修改的 IEEE 官方样式，保留源许可证信息 |
-| `figures/` | 论文图表的 PDF 和 PNG |
-| `experiment.py` | 数据处理、打分、四种选择方法、核对、计时及绘图 |
-| `fetch_data.py` | 下载公开标注并核对 SHA-256 |
-| `beginner_demo.py` | 独立可运行的滑动窗口小例子，无外部依赖 |
-| `初学者阅读说明.md` | 从简单例子理解论文与实验 |
-| `citation_audit.md` | 文献核验来源及边界 |
-| `research_record.md` | 研究配置与证据记录 |
-| `results/raw.csv` | 16,192 行逐记录、逐预算、逐方法结果 |
-| `results/summary.csv` | 整体及场景分组汇总 |
-| `results/annotation_audit.csv` | 全部标注的区间与文本关系核对 |
-| `results/verification.json` | 数据快照、正确性检查及环境信息 |
-| `results/timing.csv` | 独立窗口搜索计时 |
+环境与结果记录一致：Python 3.13.15、numpy 2.5.3、matplotlib 3.11.2。
 
-## 运行最简单的例子
+若需重新获取数据：
+
+```text
+python fetch_data.py
+```
+
+运行 `experiment.py` 会覆盖 `results/` 和 `figures/` 下的文件。计时受机器负载影响，数字会变化。
+
+最简单的算法例子（无外部依赖）：
 
 ```text
 python beginner_demo.py
 ```
 
-输入六个分数、保留三项，输出最佳开始位置 3（从 1 开始计数）、窗口 `[8, 9, 7]`、总分 24。
+输入六个分数、保留三项，输出最佳起始位置 3、窗口 `[8, 9, 7]`、总和 24。
 
-## 重建实验
+## 主要结果
 
-```text
-python -m pip install -r requirements.txt
-python fetch_data.py
-python experiment.py
-```
+名义 20% 句数预算下的完整关键跨度命中率（全部 1,012 条）：
 
-数据来源：[SPIRAL 官方仓库](https://github.com/linyueqian/SPIRAL_Dataset)。压缩包提供下载器和结果，不重复打包上游原始标注。下载器核对论文所用快照的 SHA-256，若上游内容变化会停止并报告，避免无提示地改变实验数据。
+| 方法 | 命中率 |
+|---|---|
+| 开头裁剪 | 11.07% |
+| 随机连续窗口 | 25.30% |
+| 分数 Top-k | 87.06% |
+| 滑动窗口 | 86.86% |
 
-脚本使用问题文本打分。选项、正确答案、原始关键句和关键位置不参与 TF-IDF 构建或窗口选择，仅在独立的评价阶段读取标签。随机窗口通过枚举所有合法开始位置计算精确期望，不需要反复随机抽样。所有结果按全量数据报告，未筛选有利样本。
+其他 Setting：
 
-重新运行会覆盖实验结果和图表。计时因机器负载而变化，论文通过 `results/timing_values.tex` 自动读取计时数字；重新编译后，中英文计时保持一致。
+- 10%：滑动窗口 80.04%，Top-k 80.34%
+- 30%：滑动窗口 91.01%，Top-k 89.72%
+- 50%：滑动窗口 96.44%，Top-k 94.37%
+- 实际保留句数率（名义 20%）：22.47%；滑动窗口保留词数率 25.25%，Top-k 为 28.25%。
 
-## 提交前
+指标定义：完整关键跨度命中指选中集合覆盖全部关键句；它不是问答准确率，句数预算也不是秒数预算。
 
-先阅读初学者说明，再核对算法、预算单位及指标含义。填写作者信息，并按课程要求复核和呈现辅助工具使用说明。若课程要求端到端语音模型实验，需要补充音频模型推理与对应问答结果；当前稿已清楚界定为转写检索实验。
+## 文件
+
+| 文件 | 用途 |
+|---|---|
+| `experiment.py` | 打分、四种选择方法、核对、计时与绘图 |
+| `fetch_data.py` | 下载公开标注并核对 SHA-256 |
+| `beginner_demo.py` | 无依赖的滑动窗口小例子 |
+| `requirements.txt` | numpy 与 matplotlib 版本 |
+| `data/spiral_data.jsonl` | SPIRAL 数据快照 |
+| `figures/` | 实验生成的 PDF 和 PNG 图 |
+| `results/raw.csv` | 16,192 行逐记录、逐预算、逐方法结果 |
+| `results/summary.csv` | 整体及场景分组汇总 |
+| `results/annotation_audit.csv` | 全部标注的区间与文本关系核对 |
+| `results/verification.json` | 数据快照、正确性检查及环境信息 |
+| `results/timing.csv` | 独立窗口搜索计时 |
+| `results/run_output.txt` | 一次完整运行的输出记录 |
+
+## 范围说明
+
+本实验使用发布者提供的转写，不运行 ASR、音频大模型或语音问答。
+关键跨度命中率衡量证据保留，不代表端到端问答性能，也未与 SpeechPrune 的音频模型结果作同类比较。

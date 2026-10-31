@@ -4,6 +4,20 @@ __pycache__/
 .venv/
 venv/
 
+# 论文文件：仅本地保留，不纳入实验仓库
+main_zh.*
+main_en.*
+references.bib
+IEEEtran.cls
+IEEEtran.bst
+citation_audit.md
+research_record.md
+初学者阅读说明.md
+results/main_table_*.tex
+results/timing_values.tex
+results/package_checks.json
+results/layout_check.md
+
 # 运行时缓存
 results/.matplotlib/
 
