@@ -1,0 +1,7 @@
+N,k,method,median_ms,repetitions
+1000,100,naive,0.3963,7
+1000,100,sliding,0.031,7
+3000,300,naive,2.8641,7
+3000,300,sliding,0.0975,7
+10000,1000,naive,31.3657,7
+10000,1000,sliding,0.3098,7

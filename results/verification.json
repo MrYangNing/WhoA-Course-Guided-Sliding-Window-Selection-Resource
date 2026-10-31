@@ -1,0 +1,34 @@
+{
+  "integer_exhaustive_scan_comparisons": 2000,
+  "worked_example": true,
+  "edge_cases_passed": true,
+  "records": 1012,
+  "source_sha256": "485225b9ef52c98298ceb06745c7acf022dcc7c6436c610a17dbd11e8022519f",
+  "source_bytes": 3965780,
+  "unique_ids": 1012,
+  "sentence_min": 6,
+  "sentence_max": 34,
+  "sentence_mean": 17.055335968379445,
+  "gold_size_counts": {
+    "1": 891,
+    "2": 121
+  },
+  "text_relation_counts": {
+    "exact": 924,
+    "contained": 79,
+    "other": 9
+  },
+  "real_window_checks": 4048,
+  "raw_rows": 16192,
+  "python": "3.13.15",
+  "numpy": "2.5.3",
+  "matplotlib": "3.11.2",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "cpu": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+  "exact_subset_20pct": {
+    "first": 0.11471861471861472,
+    "random": 0.25312238841904633,
+    "topk": 0.8722943722943723,
+    "sliding": 0.8690476190476191
+  }
+}
